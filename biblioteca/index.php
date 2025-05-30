@@ -14,6 +14,7 @@ $stm = $con->prepare($sql);
 $stm->execute();
 $livros = $stm->fetchAll();
 //echo "<pre>" . print_r($livros, true) . "</pre>";
+$msgErro = "";
 
 //Verificar se o usuário já clicou no Gravar
 if(isset($_POST["titulo"])) {
@@ -23,13 +24,32 @@ if(isset($_POST["titulo"])) {
     $genero = $_POST["genero"];
     $qtdPag = $_POST["paginas"];
 
+    //Validar os dados
+    $erros = array();
+    if (! $titulo) 
+    array_push($erros, 'Informe o título!');
+    if (! $autor) 
+    array_push($erros, 'Informe o autor!');
+    if (! $genero) 
+    array_push($erros, 'Informe o gênero!');
+    if (! $qtdPag) 
+    array_push($erros, 'Informe a quantidade de páginas!');
+
+    
+    if (count($erros) == 0) {
     //Inserir as informações na base de dados
-    $sql = "INSERT INTO livros (titulo, autor, genero, qtd_paginas) 
+    $sql = "INSERT INTO livros (titulo, autor, genero, paginas) 
             VALUES (?, ?, ?, ?)";
     $stm = $con->prepare($sql);
     $stm->execute([$titulo, $autor, $genero, $qtdPag]);
 
+    //Redirecionar para a mesma página a fim de limpar o buffer 
     header("location: index.php");
+
+    }else{
+        $msgErro = implode("<br>", $erros);
+        
+    }
 
 }
 
@@ -77,6 +97,7 @@ if(isset($_POST["titulo"])) {
 
     <h1>Formulário</h1>
 
+    <!--form action="" method="POST" onsubmit="return validarCampos();"-->
     <form action="" method="POST">
         <div style="margin-bottom: 10px;">
             <label for="titulo">Título: </label>
@@ -108,7 +129,14 @@ if(isset($_POST["titulo"])) {
             <button type="submit">Gravar</button>
         </div>
 
+        <div id="mensagemErro" style=" color: red"  style="margin-bottom: 10px;">
+            <?= $msgErro?>
+        </div>
+
     </form>
+
+
+    <script src="validacao/validacao.js"></script>
     
 </body>
-</html>
+</html> 
